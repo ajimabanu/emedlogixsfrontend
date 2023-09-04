@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
+
 const Codenotes = () => {
   const [results, setResults] = useState(null);
-  const [showNoNotesMessage, setShowNoNotesMessage] = useState(false);
+
   useEffect(() => {
     const fetchBooks = async () => {
       try {
         if (
           global.values &&
           global.values.code &&
-          global.years 
-          &&
-          !global.isCodeClicked 
-        
+          global.years &&
+          !global.isCodeClicked
         ) {
           const response = await fetch(
             `/codes/${global.values.code}/details/?version=${global.years}`
@@ -21,63 +20,56 @@ const Codenotes = () => {
             setResults(data);
           } else {
             console.error("Failed to fetch data");
-            setShowNoNotesMessage(true); 
+            setResults(null);
           }
         }
       } catch (error) {
         console.error("Error:", error);
-        setShowNoNotesMessage(true); 
+        setResults(null);
       }
     };
     fetchBooks();
-    if (results === null) {
-      setShowNoNotesMessage(true);
-    } else {
-      setShowNoNotesMessage(false);
-    }
   }, [global.values]);
 
   useEffect(() => {
-    if (global.isCodeClicked ) {
-      setResults(global.selectedCodeDetails); 
+    if (global.isCodeClicked) {
+      setResults(global.selectedCodeDetails);
     } else {
-    setResults(null);
-    }
-    if (results === null) {
-      setShowNoNotesMessage(true);
-    } else {
-      setShowNoNotesMessage(false);
+      setResults(null);
     }
   }, [global.selectedCodeDetails]);
-  
 
   console.log("our result is", results);
-  return (
 
+  return (
     <div
       style={{
         height: "60vh",
         width: "44vw",
         marginLeft: "13px",
-        fontFamily:"Verdana",
-        fontSize:"13px"
+        fontFamily: "Verdana",
+        fontSize: "13px",
       }}
     >
-     
- 
-        {results && results.chapter && results.chapter.description ? (
+      {results ? (
+        results.chapter && results.chapter.description ? (
           <div key={results.code}>
             <div style={{ marginLeft: "17px" }}>
               {results.chapter.description}
             </div>
           </div>
-        )  : showNoNotesMessage ? (
-          <div style={{
-            marginLeft:"40px"
-          }}>No Section notes</div>
-        ) :null}
-      </div>
-  
+        ) : (
+          <div
+            style={{
+              marginLeft: "40px",
+            }}
+          >
+            No Section notes
+          </div>
+        )
+      ) : null}
+    </div>
   );
 };
+
 export default Codenotes;

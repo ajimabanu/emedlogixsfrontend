@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { styled } from "@mui/material/styles";
 import Table from "@mui/material/Table";
@@ -7,8 +6,8 @@ import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import { Box, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { Box, TextField, Typography, Button } from "@mui/material";
+import { useState, useEffect } from "react";
 import "../App.css";
 import { Loads } from "./Loads";
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -16,13 +15,11 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
     backgroundColor: theme.palette.common.black,
     color: theme.palette.common.white,
     backgroundColor: "#90B2D8",
-   
   },
   [`&.${tableCellClasses.body}`]: {
     fontSize: 14,
     height: 1,
     border: "1px solid grey",
-   
   },
 }));
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
@@ -41,6 +38,10 @@ export default function NeoplasmTable({ setResults1, setSelectedCode }) {
   const [clickedCode, setClickedCode] = useState(null);
   const [result1, setResult1] = useState([]);
   const [fetchedData, setFetchedData] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 100;
+
   React.useEffect(() => {
     const fetchBooks = async () => {
       try {
@@ -132,6 +133,38 @@ export default function NeoplasmTable({ setResults1, setSelectedCode }) {
       console.error("Error:", error);
     }
   };
+
+  useEffect(() => {
+    // Fetch data for the current page
+    const fetchData = async () => {
+      try {
+        // Calculate the start index based on the current page
+        const startIndex = (currentPage - 1) * itemsPerPage;
+
+        // Fetch data for the current page
+        const response = await fetch(
+          `/codes/${global.values.code}/neoplasm?start=${startIndex}&limit=${itemsPerPage}`
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setNeo(data);
+        } else {
+          console.error("Failed to fetch data");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchData();
+  }, [currentPage]);
+
+  // Function to load the next page
+  const loadNextPage = () => {
+    setCurrentPage(currentPage + 1);
+  };
+
   return (
     <>
       <TableContainer
@@ -139,7 +172,6 @@ export default function NeoplasmTable({ setResults1, setSelectedCode }) {
           position: "absolute",
           height: "66vh",
           width: "50vw",
-        
 
           mt: "30px",
         }}
@@ -401,6 +433,13 @@ export default function NeoplasmTable({ setResults1, setSelectedCode }) {
           )}
         </Table>
       </TableContainer>
+
+      {/* Pagination */}
+      {neo && neo.length > 0 && (
+        <Button variant="outlined" onClick={loadNextPage}>
+          Load More
+        </Button>
+      )}
     </>
   );
 }

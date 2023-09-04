@@ -1,101 +1,75 @@
 import React, { useEffect, useState } from "react";
 import "../styles/Sectionnotes.css";
-import { Loads } from "./Loads";
 const Sectionnotes = () => {
   const [results, setResults] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showNoNotesMessage, setShowNoNotesMessage] = useState(false);
-
   const globalValuesCode = global.values.code;
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        if (
-          globalValuesCode &&
-          global.years 
-          &&
-          !global.isCodeClicked 
- 
-        ) {
+        if (globalValuesCode && global.years && !global.isCodeClicked) {
           const response = await fetch(
             `/codes/${globalValuesCode}/details/?version=${global.years}`
           );
           if (response.ok) {
             const data = await response.json();
             setResults(data);
-  
-
-          
           } else {
             console.error("Failed to fetch data");
-          
+            setResults(null);
           }
         }
       } catch (error) {
         console.error("Error:", error);
-        
-      }
-      finally {
-        setIsLoading(false);
+        setResults(null);
       }
     };
-    setIsLoading(true);
     fetchBooks();
-    if (results === null) {
-      setShowNoNotesMessage(true);
-    } else {
-      setShowNoNotesMessage(false);
-    }
-  }, [globalValuesCode, global.years]);
-
+  }, [global.values]);
 
   useEffect(() => {
-    if (global.isCodeClicked ) {
+    if (global.isCodeClicked) {
       setResults(global.selectedCodeDetails);
     } else {
       setResults(null);
     }
-    if (results === null) {
-      setShowNoNotesMessage(true);
-    } else {
-      setShowNoNotesMessage(false);
-    }
   }, [global.selectedCodeDetails]);
 
-
+  console.log("our result is", results);
   return (
     <div
-    
       style={{
         height: "40vh",
         width: "43vw",
-      
+
         marginTop: "-20px",
         fontFamily: "Verdana ",
-       
       }}
     >
-     <div style={{
-      marginLeft:"-100px"
-     }}>
-        {results && results.section && results.section.notes ? (
-          <table>
-            <tbody className="chapter">
-              {results.section.notes.map((note, index) => (
-                <tr key={index}>
-                  <td>{note.notes}</td>
+      <div
+        style={{
+          marginLeft: "-100px",
+        }}
+      >
+        {results ? (
+          results.section && results.section.notes ? (
+            <table>
+              <tbody className="chapter">
+                {results.section.notes.map((note, index) => (
+                  <tr key={index}>
+                    <td>{note.notes}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <table>
+              <tbody className="chapter">
+                <tr>
+                  <td>No Code notes</td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : showNoNotesMessage ? (
-          <table>
-            <tbody className="chapter">
-              <tr>
-                <td>No Code notes</td>
-              </tr>
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          )
         ) : null}
 
         {globalValuesCode === "H548" && results?.section?.visualImpairment ? (
